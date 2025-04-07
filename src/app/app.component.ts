@@ -1,13 +1,25 @@
 import { Component } from '@angular/core';
-import {transition, trigger, useAnimation} from "@angular/animations";
+import {animation, transition, trigger, useAnimation} from "@angular/animations";
+import { shakeX } from 'ng-animate';
+
+const DEATH_DURATION_SECONDS = 0.5;
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  animations: [
+    trigger("death", [
+      transition(
+        ":increment",
+        useAnimation(shakeX, { params: { timing: DEATH_DURATION_SECONDS }})
+      )
+    ])
+  ]
 })
 export class AppComponent {
   slimeIsPresent = false;
+  ng_death = false;
 
   constructor() {
   }
@@ -15,6 +27,13 @@ export class AppComponent {
   spawn() {
     this.slimeIsPresent = true;
     // TODO Animation angular avec forwards
+    this.showSlime();
+  }
+
+  showSlime(){
+    var element = document.getElementById("slimeyId");
+    element?.classList.remove("fadeOut");
+    element?.classList.add("fadeIn");
   }
 
   death(){
