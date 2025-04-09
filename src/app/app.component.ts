@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import {animation, transition, trigger, useAnimation} from "@angular/animations";
-import { bounce, pulse, shakeX } from 'ng-animate';
-import { BoundElementProperty } from '@angular/compiler';
+import { bounce, flip, pulse, shake, shakeX } from 'ng-animate';
+import { lastValueFrom, timer } from 'rxjs';
 
 
-const DEATH_DURATION_SECONDS = 0.5;
-
+const DEATH_DURATION_SECONDS = 0.75;
+const ROTATE_CENTER_DURATION_SECONDS = 0.8; 
+const ROTATE_TOP_DURATION_SECONDS = 0.7;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -24,6 +25,20 @@ const DEATH_DURATION_SECONDS = 0.5;
           useAnimation(pulse, { params: { timing: 0.3, scale: 4.5 }})
         ]
       )
+    ]),
+    trigger("shake", [
+      transition(
+        ":increment",[
+          useAnimation(bounce, { params: { timing: 1 }}),
+        ]
+      )
+    ]),
+    trigger("flip", [
+      transition(
+        ":increment", [
+          useAnimation(flip, {params: { timing: 0.75 }})
+        ]
+      )
     ])
   ]
 })
@@ -32,8 +47,21 @@ export class AppComponent {
   ng_death : number = 0;
   ng_attack : number = 0;
   css_hit : boolean = false;
+  ng_shake : number = 0;
+  ng_flip : number = 0;
+
+  css_rotate : boolean = false;
+  css_rotate_top : boolean = false;
 
   constructor() {
+  }
+
+  async triple(){
+    this.ng_death++;
+    await lastValueFrom(timer(1000))
+    this.ng_shake++;
+    await lastValueFrom(timer(750));
+    this.ng_flip++;
   }
 
   spawn() {
@@ -74,5 +102,25 @@ export class AppComponent {
     // TODO Utilisé Animista pour faire une animation différente avec css (wobble)
     this.css_hit = true;
     setTimeout(() => {this.css_hit = false; }, 1600)
+  }
+
+  infiniteTripleSpin(){
+    this.doubleCenterSpin();
+  }
+
+  doubleCenterSpin(){
+    this.css_rotate = true;
+    setTimeout(() => {
+      this.css_rotate = false;
+      this.topSpin();
+    }, ROTATE_CENTER_DURATION_SECONDS * 2 * 1000)
+  }
+
+  topSpin(){
+    this.css_rotate_top = true;
+    setTimeout(() => {
+      this.css_rotate_top = false;
+      this.doubleCenterSpin();
+    }, ROTATE_TOP_DURATION_SECONDS * 1000)
   }
 }
